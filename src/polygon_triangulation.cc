@@ -3,6 +3,7 @@
 #include <cstring>
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 
 /* -------------------------------------------------------------------------- */
 
@@ -182,6 +183,8 @@ void PolygonTriangulation::triangulate_monochain(Monochain_t &monochain,
 {
   const auto &end = monochain.list.end();
 
+  std::ofstream fout("triangles.txt", std::ios::app);
+
   for (auto current = next(first, end); monochain.list.size() >= 3u;) {
     const auto v0 = *prev(current, end);
     const auto v1 = *current;
@@ -190,6 +193,12 @@ void PolygonTriangulation::triangulate_monochain(Monochain_t &monochain,
     if (is_angle_convex(v0, v1, v2)) {
       triangles.push_back(triangle_t(v0, v1, v2));
       // remove current vertex from the chain and update position.
+      
+      // Export the triangle vertices 
+      fout << vertices_[v0].x << "," << vertices_[v0].y << " "
+      << vertices_[v1].x << "," << vertices_[v1].y << " " 
+      << vertices_[v2].x << "," << vertices_[v2].y << std::endl;
+
       const auto &save = prev(current, end);
       monochain.list.erase(current);
       current = (first == save) ? next(first, end) : save;
@@ -197,6 +206,8 @@ void PolygonTriangulation::triangulate_monochain(Monochain_t &monochain,
       current = next(current, end);
     }
   }
+
+  fout.close();
 }
 
 /* -------------------------------------------------------------------------- */
